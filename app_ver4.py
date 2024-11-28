@@ -2,8 +2,6 @@ from flask import Flask, request, jsonify
 import numpy as np
 import tensorflow as tf
 import csv
-from keybert import KeyBERT
-kw_model = KeyBERT()
 
 app = Flask(__name__)
 
@@ -64,6 +62,11 @@ def recommend():
     
     return jsonify({'recommended_genres': recommended_genres})
 
+
+
+from keybert import KeyBERT
+kw_model = KeyBERT()
+
 @app.route('/extract_keywords', methods=['POST'])
 def extract_keywords():
     data = request.json
@@ -75,6 +78,7 @@ def extract_keywords():
     keyword_list = [keyword[0] for keyword in keywords]
     
     return jsonify({"keywords": keyword_list})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
