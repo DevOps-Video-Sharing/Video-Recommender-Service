@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify
 import numpy as np
 import tensorflow as tf
 import csv
-
 app = Flask(__name__)
+import json
 
 # Định nghĩa số lượng thể loại
 num_genres = 3862  # Số lượng thể loại hiện tại (theo số cột trong model)
@@ -64,8 +64,10 @@ def recommend():
 
 
 
+
 from keybert import KeyBERT
 kw_model = KeyBERT()
+from kafka import KafkaConsumer, KafkaProducer
 
 @app.route('/extract_keywords', methods=['POST'])
 def extract_keywords():
@@ -79,6 +81,39 @@ def extract_keywords():
     
     return jsonify({"keywords": keyword_list})
 
+# Kafka Consumer Configuration
+consumer = KafkaConsumer(
+    'video-description-topic',
+    bootstrap_servers=['localhost:9092'],
+    auto_offset_reset='earliest',
+    enable_auto_commit=True,
+    group_id='video-description-group',
+    value_deserializer=lambda x: json.loads(x.decode('utf-8'))
+)
+
+# Kafka Producer Configuration
+producer = KafkaProducer(
+    bootstrap_servers=['localhost:9092'],
+    value_serializer=lambda x: json.dumps(x).encode('utf-8')
+)
+
+
+for message in consumer:
+    data = message.value
+    video_id = data.get("videoID", "")
+    description = data.get("description", "")
+    if description:
+        print(f"Processing description: {description}")
+        # Gọi hàm phân tích keywords tại đây
+        keywords = kw_model.extract_keywords(description, keyphrase_ngram_range=(1, 2), stop_words='english')
+        keyword_list = [keyword[0] for keyword in keywords]
+        print(f"Extracted keywords: {keyword_list}")
+
+        producer.send(
+            'video-genres-topic',
+            value={"videoID": video_id, "genres": keyword_list}
+        )
+        print(f"Sent keywords to Kafka: {keyword_list}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050)
