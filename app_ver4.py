@@ -98,22 +98,26 @@ producer = KafkaProducer(
 )
 
 
-for message in consumer:
-    data = message.value
-    video_id = data.get("videoID", "")
-    description = data.get("description", "")
-    if description:
-        print(f"Processing description: {description}")
-        # Gọi hàm phân tích keywords tại đây
-        keywords = kw_model.extract_keywords(description, keyphrase_ngram_range=(1, 2), stop_words='english')
-        keyword_list = [keyword[0] for keyword in keywords]
-        print(f"Extracted keywords: {keyword_list}")
+import threading
+def consume_kafka():
+    for message in consumer:
+        data = message.value
+        video_id = data.get("videoID", "")
+        description = data.get("description", "")
+        if description:
+            print(f"Processing description: {description}")
+            # Gọi hàm phân tích keywords tại đây
+            keywords = kw_model.extract_keywords(description, keyphrase_ngram_range=(1, 2), stop_words='english')
+            keyword_list = [keyword[0] for keyword in keywords]
+            print(f"Extracted keywords: {keyword_list}")
 
-        producer.send(
-            'video-genres-topic',
-            value={"videoID": video_id, "genres": keyword_list}
-        )
-        print(f"Sent keywords to Kafka: {keyword_list}")
+            producer.send(
+                'video-genres-topic',
+                value={"videoID": video_id, "genres": keyword_list}
+            )
+            print(f"Sent keywords to Kafka: {keyword_list}")
 
 if __name__ == '__main__':
+    kafka_thread = threading.Thread(target=consume_kafka)
+    kafka_thread.start()
     app.run(host='0.0.0.0', port=5050)
