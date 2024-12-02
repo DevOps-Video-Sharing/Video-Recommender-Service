@@ -65,6 +65,7 @@ def recommend():
 
 
 
+
 from keybert import KeyBERT
 kw_model = KeyBERT()
 from kafka import KafkaConsumer, KafkaProducer
