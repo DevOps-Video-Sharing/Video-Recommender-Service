@@ -35,17 +35,21 @@ def find_synonyms(word, top_n=5):
 @app.route('/synonyms', methods=['POST'])
 def get_synonyms():
     data = request.json
-    word = data.get('word', '').strip()
+    words = data.get('words', [])  # Lấy danh sách từ từ payload
     
-    if not word:
-        return jsonify({'error': 'Word is required'}), 400
+    if not isinstance(words, list) or not words:
+        return jsonify({'error': 'Input must be a non-empty array of words'}), 400
     
-    synonyms = find_synonyms(word)
+    synonyms_list = []
     
-    if not synonyms:
-        return jsonify({'error': f"No synonyms found for '{word}'"}), 404
+    for word in words:
+        word = word.strip()
+        if word:  # Bỏ qua các từ rỗng
+            synonyms = find_synonyms(word)
+            synonyms_list.extend(synonyms)  # Gộp tất cả các từ đồng nghĩa vào danh sách
     
-    return jsonify({'word': word, 'synonyms': synonyms})
+    return jsonify(synonyms_list)
+
 
 
 
