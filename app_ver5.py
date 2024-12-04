@@ -38,7 +38,7 @@ def find_synonyms(word, top_n=5):
 def consume_kafka():
     consumer = KafkaConsumer(
         'synonyms_topic',
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=['192.168.120.131:30392'],
         auto_offset_reset='earliest',
         value_deserializer=lambda x: x.decode('utf-8')
     )
@@ -145,7 +145,7 @@ kafka_thread.start()
 
 def produce_message(user_id, genres):
     producer = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=['192.168.120.131:30392'],
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
 
@@ -179,7 +179,7 @@ def extract_keywords():
 # Kafka Consumer Configuration
 consumer = KafkaConsumer(
     'video-description-topic',
-    bootstrap_servers=['localhost:9092'],
+    bootstrap_servers=['192.168.120.131:30392'],
     auto_offset_reset='earliest',
     enable_auto_commit=True,
     group_id='video-description-group',
@@ -217,4 +217,4 @@ if __name__ == '__main__':
 
     # kafka_threadSynonyms = threading.Thread(target=consume_kafkaSynonyms)
     # kafka_threadSynonyms.start()
-    app.run(host='0.0.0.0', port=5050)
+    app.run(host='0.0.0.0', port=5606)
