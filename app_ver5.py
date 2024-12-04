@@ -188,7 +188,7 @@ consumer = KafkaConsumer(
 
 # Kafka Producer Configuration
 producer = KafkaProducer(
-    bootstrap_servers=['localhost:9092'],
+    bootstrap_servers=['192.168.120.131:30392'],
     value_serializer=lambda x: json.dumps(x).encode('utf-8')
 )
 
