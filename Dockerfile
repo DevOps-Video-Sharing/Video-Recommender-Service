@@ -1,20 +1,30 @@
-# Sử dụng Python 3.9 làm image cơ bản
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Thiết lập thư mục làm việc bên trong container
+# Set the working directory in the container
 WORKDIR /app
 
-# Sao chép file requirements.txt vào container
-COPY requirements.txt /app/requirements.txt
+# Copy the application source code to the container
+COPY app_ver5.py /app/
 
-# Cài đặt các thư viện cần thiết
+# Copy any additional files required by the app (models, pickles, etc.)
+COPY synonym_model.h5 /app/
+COPY word_to_index.pkl /app/
+COPY index_to_word.pkl /app/
+
+# Install required system packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Sao chép toàn bộ mã nguồn ứng dụng vào container
-COPY . /app
-
-# Mở cổng 5606
+# Expose the application's port
 EXPOSE 5606
 
-# Chạy ứng dụng
-CMD ["python", "app.py"]
+# Set the command to run the application
+CMD ["python", "app_ver5.py"]

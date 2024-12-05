@@ -6,6 +6,8 @@ import json
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import threading
+
+KAFKA_BROKER = '192.168.120.131:30392'
 app = Flask(__name__)
 
 # Load model
@@ -38,7 +40,7 @@ def find_synonyms(word, top_n=5):
 def consume_kafka():
     consumer = KafkaConsumer(
         'synonyms_topic',
-        bootstrap_servers=['192.168.120.131:30392'],
+        bootstrap_servers=[KAFKA_BROKER],
         auto_offset_reset='earliest',
         value_deserializer=lambda x: x.decode('utf-8')
     )
@@ -145,7 +147,7 @@ kafka_thread.start()
 
 def produce_message(user_id, genres):
     producer = KafkaProducer(
-        bootstrap_servers=['192.168.120.131:30392'],
+        bootstrap_servers=[KAFKA_BROKER],
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
 
@@ -179,7 +181,7 @@ def extract_keywords():
 # Kafka Consumer Configuration
 consumer = KafkaConsumer(
     'video-description-topic',
-    bootstrap_servers=['192.168.120.131:30392'],
+    bootstrap_servers=[KAFKA_BROKER],
     auto_offset_reset='earliest',
     enable_auto_commit=True,
     group_id='video-description-group',
@@ -188,7 +190,7 @@ consumer = KafkaConsumer(
 
 # Kafka Producer Configuration
 producer = KafkaProducer(
-    bootstrap_servers=['192.168.120.131:30392'],
+    bootstrap_servers=[KAFKA_BROKER],
     value_serializer=lambda x: json.dumps(x).encode('utf-8')
 )
 
