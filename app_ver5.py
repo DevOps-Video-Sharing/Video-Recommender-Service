@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import threading
 
-KAFKA_BROKER = '192.168.120.131:30392'
+KAFKA_BROKER = '192.168.120.131:9092'
 app = Flask(__name__)
 
 # Load model
